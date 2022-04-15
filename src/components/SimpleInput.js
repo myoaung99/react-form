@@ -1,63 +1,48 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useInput from "../hooks/useInput";
 
 const SimpleInput = (props) => {
-  const [enteredName, setEnteredName] = useState("");
-  const [enteredNameTouch, setEnteredNameTouch] = useState(false);
+  const {
+    value: enteredName,
+    hasError: nameInputHasError,
+    valueIsValid: enteredNameIsValid,
+    valueChangeHandler: nameChangeHandler,
+    valueBlurHandler: nameBlurHandler,
+    resetForm: resetNameInput,
+  } = useInput((value) => value.trim() !== "");
 
-  const [enteredEmail, setEnteredEmail] = useState("");
-  const [enteredEmailTouch, setEnterEmailTouch] = useState(false);
-
-  // component mount တာနဲ့ validate တန်းလုပ်တော့ isValid က error တန်းထွက်တယ်
-  const enteredNameIsValid = enteredName.trim() !== "";
-  // ဒါမဲ့ user က input field ကို touch လုပ်မထားရသေး(စ ဝင်ဝင်ချင်မို့)လို့ isInvalid က false နေတာ
-  const enteredNameIsInvalid = enteredNameTouch && !enteredNameIsValid;
-
-  const enteredEmailIsValid = enteredEmail.includes("@");
-  const enteredEmailIsInvalid = enteredEmailTouch && !enteredEmailIsValid;
+  const {
+    value: enteredEmail,
+    hasError: emailInputHasError,
+    valueIsValid: emailInputIsValid,
+    valueChangeHandler: emailChangeHandler,
+    valueBlurHandler: emailBlurHandler,
+    resetForm: resetEmailInput,
+  } = useInput((value) => value.includes("@"));
 
   let formIsValid = false;
 
-  if (enteredNameIsValid) {
+  if (enteredNameIsValid && emailInputIsValid) {
     formIsValid = true;
   }
 
-  const nameChangeHandler = (event) => {
-    setEnteredName(event.target.value);
-  };
-
-  const emailChangeHandler = (event) => {
-    setEnteredEmail(event.target.value);
-  };
-
-  const nameInputBlurHandler = () => {
-    setEnteredNameTouch(true);
-  };
-
-  const emailInputBlurHandler = (event) => {
-    setEnterEmailTouch(true);
-  };
-
   const formSubmitHandler = (event) => {
     event.preventDefault();
-
-    setEnteredNameTouch(true);
 
     if (enteredName.trim() === "") {
       return;
     }
 
-    setEnteredName(" ");
-    setEnteredNameTouch(false);
+    resetNameInput();
 
-    setEnteredEmail(" ");
-    setEnterEmailTouch(false);
+    resetEmailInput();
   };
 
-  const nameInputClasses = enteredNameIsInvalid
+  const nameInputClasses = nameInputHasError
     ? "form-control invalid"
     : "form-control";
 
-  const emailInputClasses = enteredEmailIsInvalid
+  const emailInputClasses = emailInputHasError
     ? "form-control invalid"
     : "form-control";
 
@@ -70,9 +55,9 @@ const SimpleInput = (props) => {
           type="text"
           id="name"
           onChange={nameChangeHandler}
-          onBlur={nameInputBlurHandler}
+          onBlur={nameBlurHandler}
         />
-        {enteredNameIsInvalid && (
+        {nameInputHasError && (
           <p className="error-text">Name must not be empty.</p>
         )}
       </div>
@@ -84,10 +69,10 @@ const SimpleInput = (props) => {
           type="email"
           id="email"
           onChange={emailChangeHandler}
-          onBlur={emailInputBlurHandler}
+          onBlur={emailBlurHandler}
         />
-        {enteredEmailIsInvalid && (
-          <p className="error-text">Email is incorrect.</p>
+        {emailInputHasError && (
+          <p className="error-text">Email is not correct.</p>
         )}
       </div>
       <div className="form-actions">
