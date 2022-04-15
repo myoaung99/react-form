@@ -33,7 +33,7 @@ const BasicForm = (props) => {
 
   let formIsValid = false;
 
-  // for all inputs
+  // if all the input fields are correct
   if (firstNameIsValid && lastNameIsValid && emailIsValid) {
     formIsValid = true;
   }
@@ -41,12 +41,9 @@ const BasicForm = (props) => {
   const formSubmitHandler = (event) => {
     event.preventDefault();
 
-    if (!firstNameIsValid) {
-      return;
-    }
-
     console.log(firstName, lastName, email);
 
+    // reset to default {clear fields, make unTouch}
     resetFirstName();
     resetLastName();
     resetEmail();
