@@ -41,6 +41,7 @@ const BasicForm = (props) => {
   const formSubmitHandler = (event) => {
     event.preventDefault();
 
+    console.log("Submitted");
     console.log(firstName, lastName, email);
 
     // reset to default {clear fields, make unTouch}
