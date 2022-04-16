@@ -1,4 +1,6 @@
+import { useState } from "react";
 import useInput from "../hooks/useInput";
+import Modal from "./Modal";
 
 const BasicForm = (props) => {
   const {
@@ -31,6 +33,9 @@ const BasicForm = (props) => {
     inputClasses: emailClasses,
   } = useInput((value) => value.includes("@"));
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [isModalShow, setIsModalShow] = useState(false);
+
   let formIsValid = false;
 
   // if all the input fields are correct
@@ -38,11 +43,48 @@ const BasicForm = (props) => {
     formIsValid = true;
   }
 
-  const formSubmitHandler = (event) => {
+  const http = async (data) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        "https://react-5826f-default-rtdb.firebaseio.com/user-forms.json",
+        {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Something went wrong.");
+      }
+
+      const response_data = await response.json();
+      console.log(response_data.name);
+    } catch (err) {
+      setIsModalShow(true);
+      console.log(err.message);
+      console.log("Cought Error");
+    }
+
+    setIsLoading(false);
+  };
+
+  const formSubmitHandler = async (event) => {
     event.preventDefault();
 
     console.log("Submitted");
     console.log(firstName, lastName, email);
+
+    const user = {
+      firstName,
+      lastName,
+      email,
+    };
+
+    http(user);
 
     // reset to default {clear fields, make unTouch}
     resetFirstName();
@@ -50,8 +92,20 @@ const BasicForm = (props) => {
     resetEmail();
   };
 
+  const modalHandler = () => {
+    setIsModalShow((prev) => !prev);
+  };
+
+  const modal = isModalShow && (
+    <Modal onClose={modalHandler}>
+      <p>Something went wrong</p>
+      <button onClick={modalHandler}>Ok</button>
+    </Modal>
+  );
+
   return (
     <form onSubmit={formSubmitHandler}>
+      {modal}
       <div className="control-group">
         <div className={firstNameClasses}>
           <label htmlFor="name">First Name</label>
@@ -60,7 +114,7 @@ const BasicForm = (props) => {
             id="name"
             value={firstName}
             onChange={firstNameChangeHandler}
-            onBlurCapture={firstNameBlurHandler}
+            onBlur={firstNameBlurHandler}
           />
           {firstNameHasError && (
             <p className="error-text">First Name must not empty.</p>
@@ -92,7 +146,9 @@ const BasicForm = (props) => {
         {emailHasError && <p className="error-text">E-mail is not correct.</p>}
       </div>
       <div className="form-actions">
-        <button disabled={!formIsValid}>Submit</button>
+        <button disabled={!formIsValid}>
+          {isLoading ? "Loading..." : "Submit"}
+        </button>
       </div>
     </form>
   );
